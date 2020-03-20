@@ -50,6 +50,11 @@
             </el-dropdown-item>
           </a>
           <el-dropdown-item>
+            <span style="display:block;" @click="handleEditDetail">{{
+              "用户详情"
+            }}</span>
+          </el-dropdown-item>
+          <el-dropdown-item>
             <span style="display:block;" @click="handleEditPwd">{{
               "修改密码"
             }}</span>
@@ -60,6 +65,48 @@
         </el-dropdown-menu>
       </el-dropdown>
     </div>
+    <el-dialog title="用户详情" :visible.sync="dialogFormDetailVisible">
+      <el-form
+        ref="dataForm"
+        v-loading="loading"
+        element-loading-text="正在执行"
+        element-loading-background="rgba(255,255,255,0.7)"
+        :rules="rules1"
+        :model="temp1"
+        label-position="left"
+        label-width="120px"
+        style="width: 400px; margin-left:50px;"
+      >
+        <el-form-item label="昵称" prop="nick_name">
+          <el-input
+            v-model="temp1.nick_name"
+          />
+        </el-form-item>
+        <el-form-item label="邮箱" prop="email">
+          <el-input
+            v-model="temp1.email"
+          />
+        </el-form-item>
+        <el-form-item label="手机" prop="phone">
+          <el-input
+            v-model="temp1.phone"
+          />
+        </el-form-item>
+        <el-form-item label="备注" prop="memo">
+          <el-input
+            v-model="temp1.memo"
+          />
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormDetailVisible = false">
+          {{ "关闭" }}
+        </el-button>
+        <el-button type="primary" @click="editDetail()">
+          {{ "更新" }}
+        </el-button>
+      </div>
+    </el-dialog>
     <el-dialog title="修改密码" :visible.sync="dialogFormVisible">
       <el-form
         ref="dataForm"
@@ -120,7 +167,7 @@ import Screenfull from '@/components/Screenfull'
 import SizeSelect from '@/components/SizeSelect'
 // import LangSelect from '@/components/LangSelect'
 import Search from '@/components/HeaderSearch'
-import { requestEditPwd } from '@/api/app/sys/user'
+import { requestEditPwd, requestEditDetail } from '@/api/app/sys/user'
 
 export default {
   components: {
@@ -135,11 +182,18 @@ export default {
   data() {
     return {
       dialogFormVisible: false,
+      dialogFormDetailVisible: false,
       loading: true,
       temp: {
         old_password: '',
         new_password: '',
         new_password_again: ''
+      },
+      temp1: {
+        nick_name: '',
+        email: '',
+        phone: '',
+        memo: ''
       },
       rules: {
         old_password: [{ required: true, message: '请输入旧密码', trigger: 'blur' }],
@@ -153,10 +207,22 @@ export default {
       'sidebar',
       'name',
       'avatar',
+      'email',
+      'phone',
+      'memo',
       'device'
     ])
   },
+  created() {
+    this.setDetail()
+  },
   methods: {
+    setDetail() {
+      this.temp1.nick_name = this.$store.getters.name
+      this.temp1.email = this.$store.getters.email
+      this.temp1.phone = this.$store.getters.phone
+      this.temp1.memo = this.$store.getters.memo
+    },
     toggleSideBar() {
       this.$store.dispatch('app/toggleSideBar')
     },
@@ -202,6 +268,33 @@ export default {
           }).catch(() => {
             this.loading = false
           })
+        }
+      })
+    },
+    handleEditDetail() {
+      this.dialogFormDetailVisible = true
+      this.loading = false
+    },
+    editDetail() {
+      this.$refs['dataForm'].validate((valid) => {
+        if (valid) {
+          this.loading = true
+          requestEditDetail(this.temp1).then(response => {
+            this.dialogFormDetailVisible = false
+            console.log(this.$store.getters.name)
+            this.$store.dispatch('user/resetUserDetail', this.temp1).then(() => {
+              console.log(this.$store.getters.name)
+              this.$notify({
+                title: '成功',
+                message: '更新成功',
+                type: 'success',
+                duration: 2000
+              })
+            }).catch(() => {
+            })
+          }).catch(() => {
+          })
+          this.loading = false
         }
       })
     }

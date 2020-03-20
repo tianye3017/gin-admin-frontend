@@ -6,6 +6,9 @@ const state = {
   token: getToken(),
   name: '',
   avatar: '',
+  email: '',
+  phone: '',
+  memo: '',
   introduction: '',
   roles: []
 }
@@ -22,6 +25,15 @@ const mutations = {
   },
   SET_AVATAR: (state, avatar) => {
     state.avatar = avatar
+  },
+  SET_EMAIL: (state, email) => {
+    state.email = email
+  },
+  SET_PHONE: (state, phone) => {
+    state.phone = phone
+  },
+  SET_MEMO: (state, memo) => {
+    state.memo = memo
   },
   SET_ROLES: (state, roles) => {
     state.roles = roles
@@ -54,7 +66,7 @@ const actions = {
           reject('Verification failed, please Login again.')
         }
 
-        const { name, avatar, introduction } = data
+        const { name, avatar, email, phone, memo, introduction } = data
 
         // roles must be a non-empty array
         // if (!roles || roles.length <= 0) {
@@ -64,6 +76,9 @@ const actions = {
         commit('SET_ROLES', roles)
         commit('SET_NAME', name)
         commit('SET_AVATAR', avatar)
+        commit('SET_EMAIL', email)
+        commit('SET_PHONE', phone)
+        commit('SET_MEMO', memo)
         commit('SET_INTRODUCTION', introduction)
         resolve(data)
       }).catch(error => {
@@ -93,6 +108,16 @@ const actions = {
       commit('SET_TOKEN', '')
       commit('SET_ROLES', [])
       removeToken()
+      resolve()
+    })
+  },
+
+  resetUserDetail({ commit }, temp) {
+    return new Promise(resolve => {
+      commit('SET_NAME', temp.nick_name)
+      commit('SET_EMAIL', temp.email)
+      commit('SET_PHONE', temp.phone)
+      commit('SET_MEMO', temp.memo)
       resolve()
     })
   },

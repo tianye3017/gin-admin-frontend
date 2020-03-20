@@ -7,3 +7,11 @@ export function requestEditPwd(data) {
     data
   })
 }
+
+export function requestEditDetail(data) {
+  return request({
+    url: '/user/editinfo',
+    method: 'post',
+    data
+  })
+}
